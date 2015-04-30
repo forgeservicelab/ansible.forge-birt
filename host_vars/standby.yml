@@ -1,0 +1,19 @@
+---
+postgresql_hot_standby: on
+
+postgresql_users:
+  - name: bi
+    pass: 2KRstofyYeaLQyD
+    encrypted: yes
+
+postgresql_user_privileges:
+  - name: bi
+    db: redmine_production
+    priv: "ALL"
+
+postgresql_authentication:
+  - type: hostssl
+    user: bi
+    method: md5
+    database: 'redmine_production'
+    address: '192.168.2.18/32'

@@ -1,0 +1,41 @@
+---
+# tasks file for postgres
+
+- meta: flush_handlers
+
+- name: Setup a new user account
+  user: name="{{ datasource.user.name }}"
+
+- name: Setup authorized keys for the new account
+  authorized_key: 
+    user: "{{ datasource.user.name }}"
+    key: "{{ lookup('file', './files/%s' % item) }}"
+  with_items:
+    - "{{ datasource.user.auth_keys }}"
+
+- name: Create db users
+  postgresql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.pass }}"
+    encrypted: "{{ item.encrypted }}"
+  with_items:
+    - "{{ postgresql_users }}"
+  sudo_user: postgres
+
+- name: Create db
+  postgresql_db:
+    name: "{{ item.name }}"
+    owner: "{{ item.owner }}"
+  with_items:
+    - "{{ postgresql_databases }}"
+  sudo_user: postgres
+
+- name: Assign db privileges
+  postgresql_privs:
+    role: "{{ item.name }}"
+    db: "{{ item.db }}"
+    privs: "{{ item.priv }}"
+    objs: "ALL_IN_SCHEMA"
+  with_items:
+    - "{{ postgresql_user_privileges }}"
+  sudo_user: postgres

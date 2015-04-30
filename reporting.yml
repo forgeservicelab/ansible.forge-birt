@@ -1,0 +1,9 @@
+---
+
+# This playbook installs resource-usage-reporting application
+
+- hosts: reporting
+  sudo: True
+  
+  roles:
+    - resource-usage-reporting-ansible

@@ -1,0 +1,11 @@
+.#*
+*~
+desktop.ini
+id_dsa
+id_dsa.pub
+id_rsa
+id_rsa.pub
+git_access_key
+.project
+*.key
+

@@ -1,0 +1,13 @@
+[postgresql]
+193.166.25.75
+
+[reporting]
+193.166.25.75
+
+[birt]
+193.166.25.75
+
+[development:children]
+postgresql
+reporting
+birt

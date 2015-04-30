@@ -1,0 +1,7 @@
+---
+
+# - include: postgresql.yml
+- include: reporting.yml
+- include: birt-viewer.yml
+- include: birt-reports.yml
+

@@ -1,0 +1,5 @@
+---
+postgresql_wal_level: hot_standby
+postgresql_max_wal_senders: 3
+postgresql_checkpoint_segments: 16
+postgresql_wal_keep_segments: 32

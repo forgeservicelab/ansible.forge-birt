@@ -1,0 +1,13 @@
+[postgresql]
+analytics.forgeservicelab.fi
+
+[reporting]
+analytics.forgeservicelab.fi
+
+[birt]
+analytics.forgeservicelab.fi
+
+[production:children]
+postgresql
+reporting
+birt

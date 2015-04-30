@@ -1,0 +1,11 @@
+---
+- hosts: postgresql
+  sudo: True
+  roles:
+    - ansible-postgresql
+
+  tasks:
+    - meta: flush_handlers
+
+    - include: tasks/postgresql.yml
+      sudo_user: postgres

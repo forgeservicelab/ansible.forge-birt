@@ -1,0 +1,21 @@
+- src: https://github.com/zenoamaro/ansible-postgresql.git
+  path: roles/
+  name: ansible-postgresql
+  
+- src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/resource-usage-reporting-ansible.git
+  path: roles/
+  name: resource-usage-reporting-ansible
+  
+- src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/birt-viewer.git
+  path: roles/
+  name: birt-viewer
+
+- src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/birt-reports.git
+  path: roles/
+  name: birt-reports
+
+- src: git+ssh://gitlab@git.forgeservicelab.fi:10022/ansible-roles/forge_ssl.git
+  path: roles/
+  name: forge_ssl
+
+  
