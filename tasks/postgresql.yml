@@ -40,7 +40,14 @@
     - "{{ postgresql_user_privileges }}"
   sudo_user: postgres
 
+- name: Copy db schema
+  copy:
+    src: "./files/iaas.sql"
+    dest: "/tmp/iaas.sql"
+
 - name: Create db schema
-  command: "PGPASSWORD={{ datasource.db.password }} psql -U {{ datasource.user.name }} -d 'host={{ datasource.db.host }} dbname={{ datasource.db.name }} sslmode=require' < {{ lookup('file', './files/iaas.sql') }}"
+  shell: "PGPASSWORD={{ datasource.db.password }} cat /tmp/iaas.sql | psql -U {\
+{ datasource.user.name }} {{ datasource.db.name }}"
+  sudo_user: "{{ datasource.user.name }}"
   
  

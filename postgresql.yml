@@ -8,4 +8,4 @@
     - meta: flush_handlers
 
     - include: tasks/postgresql.yml
-      sudo_user: postgres
+#      sudo_user: postgres
