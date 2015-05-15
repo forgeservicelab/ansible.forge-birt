@@ -64,48 +64,41 @@ Example - Run master playbook to setup a development machine
 
 Note! Development target is supposed to setup and use local postgres db instead of external db server used by testing and production targets. That's why step 1 is needed.
 
-1. Configure local postgresql db usage
+	1. Configure local postgresql db usage
 
-  Uncomment include: postgresql.yml in the site.yml so that you'll get the local postgresql db set up
+	  Uncomment include: postgresql.yml in the site.yml so that you'll get the local postgresql db set up
 
-2. Install dependent roles
+	2. Install dependent roles
 
-  Install dependent roles prior to running any of the playbooks
+	  Install dependent roles prior to running any of the playbooks
 
-  $ ./ansible-galaxy install -r requirements.yml
+	  $./ansible-galaxy install -r requirements.yml
 
-3. Create the VM instance and configure firewall
+	3. Create the VM instance and configure firewall
 
-  Create the virtual machine from Ubuntu 14.04 server image.
+	  Create the virtual machine from Ubuntu 14.04 server image.
+	  Set the firewall rules so that you have ssh, https and PostgreSQL access into it.
+	  You might need to run apt-get update and apt-get upgrade.
 
-  Set the firewall rules so that you have ssh, https and PostgreSQL access into it.
+	4. Check the inventory, settings and keys
 
-  You might need to run apt-get update and apt-get upgrade.
+	  ./development - Inventory
+	  ./group_vars/development.yml - Development machine settings. Check all settings that are capitalized ie. all usernames and passwords and openstack settings
+	  ./files/auth_key.pub - Have the authorized key for the birt user SSH access and for birt users's postgres access
+	  ./files/auth_jenkins.pub - Have the authorized key of Jenkins to access target machine with ssh as birt user. Not needed by development target
+	  ./forgeservicelab.fi.key - Have the FORGE server key used by fore_ssl role used by birt-viewer.yml playbook
+	  ./files/git_access_key - Have the key you can use to access forge-birt-reportdesigns.git repository
 
-4. Check the inventory, settings and keys
+	5. Run the playbook
 
-  ./development - Inventory
+	  $ ansible-playbook -i development site.yml --ask-vault-pass
 
-  ./group_vars/development.yml - Development machine settings. Check all settings that are capitalized ie. all usernames and passwords and openstack settings
+	6. Verify
 
-  ./files/auth_key.pub - Have the authorized key for the birt user SSH access and for birt users's postgres access
-
-  ./files/auth_jenkins.pub - Have the authorized key of Jenkins to access target machine with ssh as birt user. Not needed by development target
-
-  ./forgeservicelab.fi.key - Have the FORGE server key used by fore_ssl role used by birt-viewer.yml playbook
-
-  ./files/git_access_key - Have the key you can use to access forge-birt-reportdesigns.git repository
-
-5. Run the playbook
-
-  $ ansible-playbook -i development site.yml --ask-vault-pass
-
-6. Verify
-
-  Use your web browser to check the birt is available in your VM
-  Check that birt user can access nova by issuing nova list
-  Check the birt user has cronjob enabled and after few days, check that cronjob run.
-  Check that resource_usage_reporting application is able to populate db
+	  Use your web browser to check the birt is available in your VM
+	  Check that birt user can access nova by issuing nova list
+	  Check the birt user has cronjob enabled and after few days, check that cronjob run.
+	  Check that resource_usage_reporting application is able to populate db
 
 
 Notes! 
