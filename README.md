@@ -31,6 +31,8 @@ resource-usage-reporting role installs and configures an application that fetche
 Inventories and group_vars
 --------------------------
 
+You should check and have your desired variables defined in the targets you are planning to use.
+
 	./development - defines a development target
 	./testing - defines FORGE testing target
 	./production - defines FORGE production target
@@ -52,7 +54,7 @@ Install parts
 	$ ansible-playbook -i development birt-viewer.yml - installs birt-viewer runtimes only
 	$ ansible-playbook -i development reporting.yml - installs iaas statistics data fetching application
 
-Note! Some inventories and roles might have FORGE speficic secrets to be deployed and therefore the vault password might be needed.
+Note! Some inventories and roles might have FORGE specific secrets to be deployed and therefore the vault password might be needed.
 
 	$ ansible-playbook -i testing birt-viewer.yml --ask-vault-pass
 
@@ -64,39 +66,47 @@ Note! Development target is supposed to setup and use local postgres db instead 
 
 1. Configure local postgresql db usage
 
-	Uncomment include: postgresql.yml in the site.yml so that you'll get the local postgresql db set up
+  Uncomment include: postgresql.yml in the site.yml so that you'll get the local postgresql db set up
 
 2. Install dependent roles
 
-	Install dependent roles prior to running any of the playbooks
+  Install dependent roles prior to running any of the playbooks
 
-	$ ./ansible-galaxy install -r requirements.yml
+  $ ./ansible-galaxy install -r requirements.yml
 
 3. Create the VM instance and configure firewall
 
-	Create the virtual machine from Ubuntu 14.04 server image.
-	Set the firewall rules so that you have ssh and https access into it.
-	You might need to run apt-get update and apt-get upgrade.
+  Create the virtual machine from Ubuntu 14.04 server image.
+
+  Set the firewall rules so that you have ssh, https and PostgreSQL access into it.
+
+  You might need to run apt-get update and apt-get upgrade.
 
 4. Check the inventory, settings and keys
 
-	./development - Inventory
-	./group_vars/development.yml - Development machine settings. Check all settings that are capitalized ie. all usernames and passwords and openstack settings
-	./files/auth_key.pub - Have the authorized key for the birt user SSH access and for birt users's postgres access
-	./files/auth_jenkins.pub - Have the authorized key of Jenkins to access target machine with ssh as birt user. Not needed by development target
-	./forgeservicelab.fi.key - Have the FORGE server key used by fore_ssl role used by birt-viewer.yml playbook
-	./files/git_access_key - Have the key you can use to access forge-birt-reportdesigns.git repository
+  ./development - Inventory
+
+  ./group_vars/development.yml - Development machine settings. Check all settings that are capitalized ie. all usernames and passwords and openstack settings
+
+  ./files/auth_key.pub - Have the authorized key for the birt user SSH access and for birt users's postgres access
+
+  ./files/auth_jenkins.pub - Have the authorized key of Jenkins to access target machine with ssh as birt user. Not needed by development target
+
+  ./forgeservicelab.fi.key - Have the FORGE server key used by fore_ssl role used by birt-viewer.yml playbook
+
+  ./files/git_access_key - Have the key you can use to access forge-birt-reportdesigns.git repository
 
 5. Run the playbook
 
-	$ ansible-playbook -i development site.yml --ask-vault-pass
+  $ ansible-playbook -i development site.yml --ask-vault-pass
 
 6. Verify
 
-	Use your web browser to check the birt is available in your VM
-	Check that birt user can access nova by issuing nova list
-	Check the birt user has cronjob enabled and after few days, check that cronjob run.
-    Check that resource_usage_reporting application is able to populate db 
+  Use your web browser to check the birt is available in your VM
+  Check that birt user can access nova by issuing nova list
+  Check the birt user has cronjob enabled and after few days, check that cronjob run.
+  Check that resource_usage_reporting application is able to populate db
+
 
 Notes! 
 ------
@@ -108,10 +118,8 @@ After running the playbook
 
 The newly deployed BIRT reports are available at the target machine as follows.
 
-````
 	https://{{ target_ip }}/birt-viewer/run?__report={{ reports_dir }}/{{ report_name }}&sample=my+parameter
 
-e.g.
+	e.g.
 	https://analytics.forgeservicelab.fi/birt-viewer/run?__report=forge_birt_reports/forge_status.rptdesign&sample=my+parameter
-   ````
    
