@@ -76,6 +76,7 @@ Note! Development target is supposed to setup and use local postgres db instead 
 
 	Create the virtual machine from Ubuntu 14.04 server image.
 	Set the firewall rules so that you have ssh and https access into it.
+	You might need to run apt-get update and apt-get upgrade.
 
 4. Check the inventory, settings and keys
 
