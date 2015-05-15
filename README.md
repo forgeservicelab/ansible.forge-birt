@@ -3,87 +3,114 @@ FORGE BIRT master playbook
 
 Ansible playbook using roles birt-viewer, birt-reports, forge_ssl, ansible-postgresql and resource-usage-reporting
 
-birt-viewer role deploys Tomcat, SQL connectors and birt runtime webapp as a user (Ubuntu) that has ssh and sudo access to the target machine. This role also creates a birt user with authorized keys (birt.pub for user access and jenkins.pub for allowing Jenkins access).
+birt-viewer
+------------
 
-birt-reports role deploys report-designs for birt-viewer runtime. Reports are fetched from git as a birt user. Therefore the birt user has to have a correct private git_access_key in the target:~birt/.ssh/git_access_key and that the corresponding public key must have been set as a deployment key for the report-designs repository. You either transfer this file manually to the target machine or let the role transfer it by having it in local:./files/git_access_key file and by uncommenting relevant lines in local:./roles/birt-reports/tasks/main.yml
+birt-viewer role deploys Tomcat, SQL connectors and birt runtime webapp as a user (Ubuntu) that has ssh and sudo access to the target machine. This role also creates a birt user with authorized keys (auth_key.pub for user access and auth_jenkins.pub for allowing Jenkins access).
 
-forge_ssl role uploads FORGE server certificates and keys and therefore you must have a key nstored in to local:./forgeservicelab.fi.key file.
+birt-reports
+------------
 
-ansible-postgresql role contains helpers for making postgres database and user access easy in local:./tasks/postgres.yml and sets up the db for resource usage reporting in case not using external db server. This role is commented out in the site.yml since FORGE is using external db server.
+birt-reports role deploys report-designs for birt-viewer runtime. Reports are fetched from git as a birt user. Therefore the birt user has to have a correct private git_access_key in the target:~birt/.ssh/git_access_key and that the corresponding public key must have been set as a deployment key for the report-designs repository. You either transfer this file manually to the target machine or let the role transfer it by having it available in local:./files/git_access_key file and by uncommenting relevant lines in local:./roles/birt-reports/tasks/main.yml
 
-resource-usage-reporting role installs and configures an application that fetches iaas statistics and populates the postgres db with the data every day by cronjob of the birt user.
+forge_ssl
+------------
 
-These roles are invoked accordingly by the following playbooks using the syntax
+forge_ssl role uploads FORGE server certificates and keys and looks the key from the master playbooks root directory. Therefore you must have the key stored in to local:./forgeservicelab.fi.key file.
 
-	$ ansible-playbook -i development site.yml
+ansible-postgresql
+------------------
 
-Playbooks
+ansible-postgresql role contains helpers for making postgres database and user access easy. The role is used by postgres.yml playbook which sets up the db for resource usage reporting. This playbook is commented out in site.yml playbook because assumption is that the db exists in the remote db server.
 
-	./site.yml - installs everything except setting up postgres db is commented out
-	./birt-reports.yml - installs report designs only
-	./birt-viewer.yml - installs birt-viewer runtimes only
-	./reporting.yml - installs iaas statistics data fetching application
+resource-usage-reporting
+------------------------
 
-Check these
---------------------
+resource-usage-reporting role installs and configures an application that fetches iaas statistics and populates defined db with the data every day by cronjob as birt user.
 
-Settings for the targets overrides roles' defaults.
+Inventories and group_vars
+--------------------------
+
+	./development - defines a development target
+	./testing - defines FORGE testing target
+	./production - defines FORGE production target
 
 	./group_vars/development.yml - settingss for the development target
-	./group_vars/testing.yml - settingss for the testing target
-	./group_vars/production.yml - settings for the production target
+	./group_vars/testing.yml - settingss for the FORGE testing target. Password protected.
+	./group_vars/production.yml - settings for the FORGE production target. Password protected.
 
-Inventory files
+Examples
+========
 
-	./development - an inventory file for the development target
-	./testing - an inventory file for the testing target
-	./production - an inventory file for the production target
+Install everything to the development target
 
-Keys and other files
+	$ ansible-playbook -i development site.yml - installs everything except db creation is commented out by default
 
-	./files/auth_key.pub - authorized key of postgresql user
-	./files/birt.pub - authorized key of yours to access target machine with ssh as birt user
-	./files/jenkins.pub - authorized key of Jenkins to access target machine with ssh as birt user
-	./forgeservicelab.fi.key - FORGE server key used by fore_ssl role
+Install parts
+
+	$ ansible-playbook -i development birt-reports.yml - installs report designs only
+	$ ansible-playbook -i development birt-viewer.yml - installs birt-viewer runtimes only
+	$ ansible-playbook -i development reporting.yml - installs iaas statistics data fetching application
+
+Note! Some inventories and roles might have FORGE speficic secrets to be deployed and therefore the vault password might be needed.
+
+	$ ansible-playbook -i testing birt-viewer.yml --ask-vault-pass
 
 
-Before running the playbook(s)
---------------------
+Example - Run master playbook to setup a development machine
+------------------------------------------------------------
 
-You should install dependent roles prior to running the playbooks.
+Note! Development target is supposed to setup and use local postgres db instead of external db server used by testing and production targets. That's why step 1 is needed.
 
-	$ ansible-galaxy install -r requirements.yml
+1. Configure local postgresql db usage
 
-After running the playbook for the first time
---------------------
+	Uncomment include: postgresql.yml in the site.yml so that you'll get the local postgresql db set up
 
-If you want to install git_access_key manually the, you should commented out the git_acess_key deployment tasks and copy the key manually to target:~/birt/.ssh/git_acess_key. If you let the Jenkins to run the playbook and use git, then make sure that Jenkins has the git_access_key counterpart.
+2. Install dependent roles
 
-The inventory files
---------------------
+	Install dependent roles prior to running any of the playbooks
 
-This playbook targets any target that is defined in inventory. To deploy everything to the development target machine
+	$ ./ansible-galaxy install -r requirements.yml
 
-    $ ansible-playbook -i development site.yml
+3. Create the VM instance and configure firewall
 
-To deploy underlying birt-viewer web app only
+	Create the virtual machine from Ubuntu 14.04 server image.
+	Set the firewall rules so that you have ssh and https access into it.
 
-	$ ansible-playbook -i development birt-viewer.yml
+4. Check the inventory, settings and keys
 
-To deploy birt-report files only to the target that already has birt-viewer web app deployed
+	./development - Inventory
+	./group_vars/development.yml - Development machine settings. Check all settings that are capitalized ie. all usernames and passwords and openstack settings
+	./files/auth_key.pub - Have the authorized key for the birt user SSH access and for birt users's postgres access
+	./files/auth_jenkins.pub - Have the authorized key of Jenkins to access target machine with ssh as birt user. Not needed by development target
+	./forgeservicelab.fi.key - Have the FORGE server key used by fore_ssl role used by birt-viewer.yml playbook
+	./files/git_access_key - Have the key you can use to access forge-birt-reportdesigns.git repository
 
-	$ ansible-playbook -i develompent birt-reports.yml
+5. Run the playbook
 
-Note! Some roles might have some FORGE speficic secrets to be deployed too and therefore the vault password might be needed.
+	$ ansible-playbook -i development site.yml --ask-vault-pass
 
-	$ ansible-playbook -i development birt-viewer.yml --ask-vault-pass
+6. Verify
+
+	Use your web browser to check the birt is available in your VM
+	Check that birt user can access nova by issuing nova list
+	Check the birt user has cronjob enabled and after few days, check that cronjob run.
+    Check that resource_usage_reporting application is able to populate db 
+
+Notes! 
+------
+
+If you want to install git_access_key manually the, you should commented out the git_acess_key deployment tasks and copy the key manually to target:~/birt/.ssh/git_acess_key. If you let the Jenkins to run the playbook and use git, then make sure that Jenkins has the git_access_key too.
 	
 After running the playbook
 --------------------
 
 The newly deployed BIRT reports are available at the target machine as follows.
 
-   https://{{ target_ip }}/birt-viewer/run?__report={{ reports_dir }}/{{ report_name }}&sample=my+parameter   
+````
+	https://{{ target_ip }}/birt-viewer/run?__report={{ reports_dir }}/{{ report_name }}&sample=my+parameter
 
-   e.g.
-   https://analytics.forgeservicelab.fi/birt-viewer/run?__report=forge_birt_reports/forge_status.rptdesign&sample=my+parameter
+e.g.
+	https://analytics.forgeservicelab.fi/birt-viewer/run?__report=forge_birt_reports/forge_status.rptdesign&sample=my+parameter
+   ````
+   

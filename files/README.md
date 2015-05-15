@@ -1,5 +1,7 @@
 Have your files here as follows
 
 ./git_access_key
-./birt.pub
-./jenkins.pub
+./auth_key.pub
+./auth_jenkins.pub
+
+iaas.sql defines the schema for the iaas database
