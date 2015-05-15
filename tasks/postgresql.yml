@@ -39,3 +39,8 @@
   with_items:
     - "{{ postgresql_user_privileges }}"
   sudo_user: postgres
+
+- name: Create db schema
+  command: "PGPASSWORD={{ datasource.db.password }} psql -U {{ datasource.user.name }} -d 'host={{ datasource.db.host }} dbname={{ datasource.db.name }} sslmode=require' < {{ lookup('file', './files/iaas.sql') }}"
+  
+ 
