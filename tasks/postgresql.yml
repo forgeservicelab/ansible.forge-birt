@@ -49,13 +49,4 @@
   shell: "PGPASSWORD={{ datasource.db.password }} cat /tmp/iaas.sql | psql -U {\
 { datasource.user.name }} {{ datasource.db.name }}"
   sudo_user: "{{ datasource.user.name }}"
-
-#- name: Ensure ssl
-#  lineinfile: dest=/etc/postgresql/9.4/main/postgresql.conf regexp=^ssl\s*=off line=ssl=on
-
-- name: Ensure ssl
-  replace:
-    dest: /etc/postgresql/9.4/main/postgresql.conf
-    regexp: '^ssl\s*=off'
-    replace: '\1ssl=on\1'
     
