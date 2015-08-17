@@ -116,3 +116,13 @@ The newly deployed BIRT reports are available at the target machine as follows.
 	e.g.
 	https://analytics.forgeservicelab.fi/birt-viewer/run?__report=forge_birt_reports/forge_status.rptdesign&sample=my+parameter
    
+
+License
+========================================
+
+MIT
+
+Author
+========================================
+
+Pasi Kivikangas, DIGILE LTd.
