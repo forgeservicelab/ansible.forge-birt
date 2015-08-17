@@ -1,0 +1,94 @@
+---
+
+# apache2 site conf default-ssl.conf for the testing target
+apache:
+  server_name: "193.166.25.75"
+  allow_ip: "83.150.108.249 193.166.24.248/31 193.166.24.246/31 193.166.24.235/32 193.166.24.250/32 193.166.24.236/30"
+  sslcert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+  sslkey: '/etc/ssl/private/ssl-cert-snakeoil.key'
+  # sslchain: '/etc/ssl/forgeservicelab.fi.crt.chain'
+
+# Override birt-reports role defaults
+birt_reports:
+  user:
+    name: birt
+    auth_keys:
+      - 'auth_key.pub'
+      - 'auth_jenkins.pub'
+  repo_access_key: git_access_key
+  repo: ssh://gitlab@git.forgeservicelab.fi:10022/forge/forge-birt-reportdesigns.git
+  connection_profile:
+    - name: iaas
+      src: iaas_testing
+      dst: iaas_db
+
+    - name: redmine
+      src: redmine_testing
+      dst: redmine_db
+  
+# Override resource-usage-reporting-ansible role defaults
+datasource:
+  user: 
+    name: "birt"
+    auth_keys:
+      - 'auth_key.pub'
+  os:
+    auth_url: "https://cloud.forgeservicelab.fi:5001/v2.0"
+    tenant_id: "YOUR OPENSTACK TENANT ID"
+    tenant_name: "YOUR OPENSTACK TENANT NAME"
+    username: "YOUR OPENSTACK USERNAME"
+    password: "YOUR OPENSTACK PASSWORD"
+  app:
+    repo: "ssh://gitlab@git.forgeservicelab.fi:10022/forge/resource-usage-reporting.git"
+    repo_key: "git_access_key"
+    dest: "/home/birt/bin/resource-usage-reporting"      
+  db: 
+    user: "birt"
+    name: "iaas_testing"
+    host: "dbserver.forgeservicelab.fi"
+    password: "YOUR DESIRED PSQL PASSWORD"
+    defaults:
+      capacity:
+        vcpus: "1312"
+        memory: "4112384"
+        volume: "65536"
+
+# Veriables for tasks/postgresql.yml
+web_domain: "{{ ansible_ssh_host }}"
+
+postgresql_users:
+  - name: "birt"
+    pass: "YOUR DESIRED PSQL PASSWORD"
+    encrypted: yes
+
+postgresql_databases:
+  - name: "iaas_testing"
+    hstore: yes
+    uuid-ossp: yes
+    owner: birt
+
+postgresql_user_privileges:
+  - name: "birt"
+    db: "iaas_testing"
+    priv: "ALL"
+
+postgresql_listen_addresses:
+  - 0.0.0.0
+
+postgresql_log_destination: syslog
+
+postgresql_logging_collector: on
+
+postgresql_authentication:
+  - type: host
+    user: "birt"
+    method: md5
+    database: "iaas_testing"
+    address:  83.150.108.249/32
+
+  - type: host
+    user: "birt"
+    method: md5
+    database: "iaas_testing"
+    address:  "{{ inventory_hostname }}/32"
+      
